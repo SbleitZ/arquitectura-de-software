@@ -70,6 +70,9 @@ pipeline se detiene.
 
 ## Evidencias
 
-- `evidencia/ejecucion_local.txt`: corrida completa del pipeline (npm ci, lint, pruebas y prueba de humo).
-- `evidencia/gate_detecta_error.txt`: el gate de pruebas detectando un error introducido a propósito.
+- `evidencia/01_instalacion_y_lint.png`: instalación (npm ci) y ESLint sin errores.
+- `evidencia/02_pruebas_jest_cobertura.png`: 14/14 pruebas aprobadas y cobertura de 97,9 %.
+- `evidencia/03_prueba_de_humo.png`: el servicio responde /salud y rechaza la segunda validación (409).
+- `evidencia/04_gate_detecta_error.png`: el gate detectando un error de concurrencia introducido a propósito.
+- `evidencia/*.txt`: los mismos registros en texto.
 - Ejecuciones en GitHub: pestaña **Actions** de este repositorio.
