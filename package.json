@@ -1,0 +1,37 @@
+{
+  "name": "ticketflow-validacion",
+  "version": "1.1.0",
+  "description": "Servicio de Validacion de entradas de TicketFlow - valida un codigo QR y marca la entrada como usada, evitando reutilizacion.",
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "lint": "eslint .",
+    "test": "jest --coverage",
+    "ci": "npm run lint && npm test"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "coverageThreshold": {
+      "global": {
+        "statements": 80,
+        "branches": 70,
+        "functions": 80,
+        "lines": 80
+      }
+    }
+  },
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
+  }
+}
