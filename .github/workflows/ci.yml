@@ -1,0 +1,78 @@
+name: CI/CD - Servicio de Validacion
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+jobs:
+  # ---------- CI: integracion, construccion y pruebas ----------
+  ci:
+    name: Integracion continua (lint + pruebas)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: 2. Instalar dependencias (npm ci)
+        run: npm ci
+
+      - name: 3. Analisis estatico (ESLint)
+        run: npm run lint
+
+      # Gate de calidad: si una prueba falla o la cobertura baja del umbral,
+      # el job falla y el Pull Request queda bloqueado.
+      - name: 4. Pruebas automatizadas (Jest + cobertura)
+        run: npm test
+
+      - name: 5. Publicar reporte de cobertura
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reporte-cobertura
+          path: coverage/
+
+  # ---------- CD: empaquetado y entrega ----------
+  entrega:
+    name: Entrega continua (imagen Docker + prueba de humo)
+    needs: ci
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar codigo
+        uses: actions/checkout@v4
+
+      - name: 6. Construir imagen Docker
+        run: docker build -t ticketflow-validacion:${{ github.sha }} .
+
+      - name: 7. Prueba de humo sobre el contenedor
+        run: |
+          docker run -d -p 3000:3000 --name validacion ticketflow-validacion:${{ github.sha }}
+          for i in $(seq 1 15); do
+            if curl -sf http://localhost:3000/salud; then echo; echo "Servicio OK"; break; fi
+            sleep 1
+          done
+          curl -sf http://localhost:3000/salud
+          curl -s -X POST http://localhost:3000/validar \
+            -H "Content-Type: application/json" \
+            -d '{"codigo":"QR-DEMO-001"}'
+          docker stop validacion
+
+      - name: 8. Guardar imagen como artefacto de entrega
+        run: docker save ticketflow-validacion:${{ github.sha }} | gzip > ticketflow-validacion.tar.gz
+
+      - name: Publicar artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: imagen-docker
+          path: ticketflow-validacion.tar.gz
+          retention-days: 7
