@@ -1,0 +1,56 @@
+Evidencia de ejecucion local del pipeline - Servicio de Validacion (TicketFlow)
+Fecha: 2026-11-18 17:32:37 -03   Node: v22.23.5   npm: 10.9.9
+Comandos identicos a los del workflow .github/workflows/ci.yml
+
+==== Etapa 2: npm ci ====
+
+added 423 packages in 2s
+
+==== Etapa 3: npm run lint (ESLint) ====
+
+> ticketflow-validacion@1.1.0 lint
+> eslint .
+
+exit code: 0
+
+==== Etapa 4: npm test (Jest + cobertura) ====
+PASS test/validacionService.test.js
+  ValidacionService
+    ✓ permite el acceso con un codigo QR valido y no usado (6 ms)
+    ✓ marca la entrada como usada despues de validarla (11 ms)
+    ✓ rechaza una entrada que ya fue validada antes (ASR-05) (11 ms)
+    ✓ rechaza un codigo que no existe en el sistema (5 ms)
+    ✓ rechaza un codigo vacio o invalido (1 ms)
+    ✓ con 20 escaneos simultaneos del mismo QR, solo uno tiene exito (ASR-05) (5 ms)
+    ✓ no permite crear dos entradas con el mismo codigo (5 ms)
+
+PASS test/app.test.js
+  API del Servicio de Validacion
+    ✓ GET /salud responde ok (18 ms)
+    ✓ POST /validar con la entrada demo permite el acceso (14 ms)
+    ✓ POST /validar la misma entrada dos veces devuelve 409 la segunda vez (14 ms)
+    ✓ POST /validar con un codigo inexistente devuelve 409 (8 ms)
+    ✓ POST /validar sin cuerpo devuelve 409 (2 ms)
+    ✓ 10 peticiones HTTP simultaneas con el mismo QR: solo una recibe 200 (ASR-05) (13 ms)
+    ✓ la validacion responde en menos de 1 segundo (ASR-02) (6 ms)
+
+----------------------|---------|----------|---------|---------|-------------------
+File                  | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+----------------------|---------|----------|---------|---------|-------------------
+All files             |   97.91 |    91.66 |     100 |   97.67 |                   
+ app.js               |   94.44 |       75 |     100 |   94.11 | 23                
+ entradaRepository.js |     100 |     87.5 |     100 |     100 | 28                
+ validacionService.js |     100 |      100 |     100 |     100 |                   
+----------------------|---------|----------|---------|---------|-------------------
+Test Suites: 2 passed, 2 total
+Tests:       14 passed, 14 total
+Snapshots:   0 total
+Time:        0.352 s, estimated 1 s
+Ran all test suites.
+exit code: 0
+
+==== Etapa 7: prueba de humo (servicio levantado) ====
+Servicio de Validacion escuchando en el puerto 3123
+GET /salud -> {"estado":"ok"}
+POST /validar QR-DEMO-001 (1ra vez) -> {"valido":true,"mensaje":"Acceso permitido"} [HTTP 200]
+POST /validar QR-DEMO-001 (2da vez) -> {"valido":false,"mensaje":"Entrada ya fue utilizada el 2026-11-18T20:32:42.248Z"} [HTTP 409]

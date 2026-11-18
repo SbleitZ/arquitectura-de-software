@@ -1,0 +1,46 @@
+Evidencia: el gate de pruebas detecta un error real (condicion de carrera)
+Fecha: 2026-11-18 17:32:52 -03
+Cambio introducido a proposito: validarEntrada lee la entrada y la marca como usada en dos pasos separados (no atomico).
+
+FAIL test/app.test.js
+  ● API del Servicio de Validacion › 10 peticiones HTTP simultaneas con el mismo QR: solo una recibe 200 (ASR-05)
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 10
+
+      46 |     );
+      47 |
+    > 48 |     expect(respuestas.filter((r) => r.status === 200)).toHaveLength(1);
+         |                                                        ^
+      49 |     expect(respuestas.filter((r) => r.status === 409)).toHaveLength(9);
+      50 |   });
+      51 |
+
+
+FAIL test/validacionService.test.js
+  ● ValidacionService › con 20 escaneos simultaneos del mismo QR, solo uno tiene exito (ASR-05)
+
+    expect(received).toHaveLength(expected)
+
+    Expected length: 1
+    Received length: 20
+
+      54 |     );
+      55 |
+    > 56 |     expect(resultados.filter((r) => r.valido)).toHaveLength(1);
+         |                                                ^
+      57 |     expect(resultados.filter((r) => !r.valido)).toHaveLength(19);
+      58 |   });
+      59 |
+
+
+Test Suites: 2 failed, 2 total
+Tests:       2 failed, 12 passed, 14 total
+Snapshots:   0 total
+Time:        0.504 s, estimated 1 s
+Ran all test suites.
+exit code: 1
+
+Resultado: el pipeline se detendria en la etapa 4 y GitHub bloquearia el merge del Pull Request.
